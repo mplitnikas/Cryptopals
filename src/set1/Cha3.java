@@ -17,42 +17,27 @@ public class Cha3 {
 	
 	public static void main(String[] args) {
 
-//		String inString = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
-//		DecodeAttempt bestGuess = freqAnalyze(inString);
-//		System.out.println("\nBest guess:");
-//		System.out.println(bestGuess.plaintext);
-//		System.out.println(bestGuess.score);
-		
+		String inString = "1b37373331363f78151b7f2b783431333d78397828372d363c78373e783a393b3736";
+		DecodeAttempt bestGuess = freqAnalyze(inString);
+		System.out.println("\nBest guess:");
+		System.out.println(bestGuess.plaintext);
+		System.out.println(bestGuess.englishness);
 		
 	}
 
-	public static double englishScore (String inputText) {
-		
-		
-		return 0.0;
-	}
-	
 	public static DecodeAttempt freqAnalyze(String inputString) {
 		
-		byte[] cypherBytes = Cha1.hexStringToBytes(inputString);
-		DecodeAttempt[] decodeAttemptsArray = new DecodeAttempt[26];
-		
-		for (int i = 0; i < 256; i++) {
-			byte[] hashedArray = hashWithByte((byte)i, cypherBytes);
-			DecodeAttempt res = new DecodeAttempt(hashedArray);
-			decodeAttemptsArray[i-97] = res;
-		}
-		
+		byte[] cypherBytes = Cha1.hexStringToBytes(inputString);	
 		DecodeAttempt best = null;
 		double bestScore = -1;
-		for (DecodeAttempt da: decodeAttemptsArray) {
-			HashMap<Character, Double> currFreqs = calculateFrequencies(da.charCounts);
-//			System.out.println("\n\nScoring string: " + da.plaintext);
-			double currScore = calculateScore(currFreqs);
-			da.englishness = currScore;
-//			System.out.println(da.score);
+		
+		for (int i = 0; i < 256; i++) {
+			byte[] hashedBytes = hashWithByte((byte)i, cypherBytes);
+			DecodeAttempt res = new DecodeAttempt(hashedBytes);
+			double currScore = calculateEnglishScore(res.plaintext);
+			res.englishness = currScore;
 			if ((currScore < bestScore) || (bestScore == -1)) {
-				best = da;
+				best = res;
 				bestScore = currScore; 
 			}
 		}
@@ -67,6 +52,25 @@ public class Cha3 {
 		byte[] hashArray = Cha2.hashByteArrays(keyArray, textBytes);		
 		
 		return hashArray;
+	}
+	
+	public static double calculateEnglishScore (String inputText) {		
+		HashMap<Character, Integer> charCounts = countChars(inputText);
+		HashMap<Character, Double> charPercents = calculateFrequencies(charCounts);
+		double englishness = calculateScore(charPercents);
+		return englishness;
+	}
+	
+	public static HashMap<Character, Integer> countChars(String inputString) {
+		char[] inputArray = inputString.toLowerCase().toCharArray();
+		
+		HashMap<Character, Integer> letterCounts = new HashMap<>();
+		
+		for (int i = 0; i < inputArray.length; i++) {
+			char currentChar = inputArray[i];
+			letterCounts.put(currentChar, letterCounts.getOrDefault(currentChar, 0)+1);
+		}
+		return letterCounts;
 	}
 	
 	public static HashMap<Character, Double> calculateFrequencies (HashMap<Character, Integer> charCounts) {
