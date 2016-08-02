@@ -16,11 +16,7 @@ public class Cha4 {
 			while ((line = br.readLine()) != null) {
 				
 				DecodeAttempt da = Cha3.freqAnalyze(line);
-//				System.out.println("\nPlaintext: " + da.plaintext);
-//				System.out.println("DA score: " + da.score);
-//				System.out.println("Best score: " + bestScore);
 				if ((da.englishness < bestScore) || (bestScore == -1)) {
-//					System.out.println("Improved!");
 					best = da;
 					bestScore = da.englishness;
 				}

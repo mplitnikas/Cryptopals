@@ -35,11 +35,6 @@ public class Cha3 {
 			byte[] hashedBytes = hashWithByte((byte)i, cypherBytes);
 			DecodeAttempt da = new DecodeAttempt(hashedBytes);
 			
-			// debug stuff
-			da.cypherBytes = cypherBytes;
-			da.cypherText = Cha1.bytesToHexString(cypherBytes);
-			da.hashChar = i;
-			
 			double currScore = calculateEnglishScore(da.plaintext);
 			da.englishness = currScore;
 			if ((currScore < bestScore) || (bestScore == -1)) {
@@ -107,11 +102,8 @@ public class Cha3 {
 		Iterator<Character> letterPercentageKeysIter = inputHisto.keySet().iterator();
 		while (letterPercentageKeysIter.hasNext()) {
 			char currChar = letterPercentageKeysIter.next();
-			// absolute value
-			//double currentDistance = Math.abs((referenceHisto.getOrDefault(currChar, 0.0) - inputHisto.get(currChar)));
-			// squared difference
-			//double currentDistance = Math.pow((referenceHisto.getOrDefault(currChar, 0.0) - inputHisto.get(currChar)), 2);
-			// chi-squared
+
+			// find distance between known letter freqs and calculated freqs using chi-squared statistic
 			double expectedValue = referenceHisto.getOrDefault(currChar, 1.0);
 			double currentDistance = Math.pow((inputHisto.get(currChar) - expectedValue), 2) / expectedValue;
 			
