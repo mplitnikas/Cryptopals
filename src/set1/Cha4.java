@@ -32,7 +32,6 @@ public class Cha4 {
 		
 		System.out.println(best.plaintext);
 		System.out.println(best.englishness);
-		
 	}
 		
 }

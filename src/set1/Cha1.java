@@ -54,7 +54,7 @@ public class Cha1 {
 		for (byte b: inputBytes) {
 			sb.append((char) b);
 		}
-		return sb.toString();
+		return sb.toString().replace('\0', ' '); // character \00 causes problems with ending strings in java
 	}
 	
 	public static String hexToAscii (String hexInput) {

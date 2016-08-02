@@ -33,11 +33,17 @@ public class Cha3 {
 		
 		for (int i = 0; i < 256; i++) {
 			byte[] hashedBytes = hashWithByte((byte)i, cypherBytes);
-			DecodeAttempt res = new DecodeAttempt(hashedBytes);
-			double currScore = calculateEnglishScore(res.plaintext);
-			res.englishness = currScore;
+			DecodeAttempt da = new DecodeAttempt(hashedBytes);
+			
+			// debug stuff
+			da.cypherBytes = cypherBytes;
+			da.cypherText = Cha1.bytesToHexString(cypherBytes);
+			da.hashChar = i;
+			
+			double currScore = calculateEnglishScore(da.plaintext);
+			da.englishness = currScore;
 			if ((currScore < bestScore) || (bestScore == -1)) {
-				best = res;
+				best = da;
 				bestScore = currScore; 
 			}
 		}
@@ -57,7 +63,7 @@ public class Cha3 {
 	public static double calculateEnglishScore (String inputText) {		
 		HashMap<Character, Integer> charCounts = countChars(inputText);
 		HashMap<Character, Double> charPercents = calculateFrequencies(charCounts);
-		double englishness = calculateScore(charPercents);
+		double englishness = compareHistograms(charPercents, letterFreqs);
 		return englishness;
 	}
 	
@@ -78,12 +84,11 @@ public class Cha3 {
 		int totalLetters = 0;
 		Iterator<Character> countIter = charCounts.keySet().iterator();
 		while (countIter.hasNext()) {
-			char currChar = countIter.next();
+			char currChar = Character.toLowerCase(countIter.next());
 			if ((currChar >= 'a') && (currChar <= 'z')) {
 				totalLetters += charCounts.get(currChar);
 			}
 		}
-		//if (totalLetters == 0) totalLetters = 1;
 		HashMap<Character, Double> letterPercentages = new HashMap<>();
 		
 		Iterator<Character> charCountKeysIter = charCounts.keySet().iterator();
@@ -96,26 +101,21 @@ public class Cha3 {
 		return letterPercentages;
 	}
 	
-	public static double calculateScore(HashMap<Character, Double> letterPercentages) {
+	public static double compareHistograms(HashMap<Character, Double> inputHisto, HashMap<Character, Double> referenceHisto) {
 		
 		double totalScore = 0;
-		Iterator<Character> letterPercentageKeysIter = letterPercentages.keySet().iterator();
+		Iterator<Character> letterPercentageKeysIter = inputHisto.keySet().iterator();
 		while (letterPercentageKeysIter.hasNext()) {
 			char currChar = letterPercentageKeysIter.next();
-			if (((currChar >= 'a') && (currChar <= 'z')) || ((currChar >= 'A') && (currChar <= 'Z'))) {
-				// using squared differences
-				double currentDistance = Math.pow((letterPercentages.getOrDefault(currChar, 0.0) - letterFreqs.get(currChar)), 2);
-//				System.out.println(letterPercentages.getOrDefault(currChar, 0.0));
-//				System.out.println(letterFreqs.get(currChar));
-				// using absolute value
-				//double currentDistance = Math.abs((letterPercentages.getOrDefault(currChar, 0.0) - letterFreqs.get(currChar)));
-				totalScore += currentDistance;
-//				System.out.println("currChar = " + currChar);
-//				System.out.println("Distance: " + currentDistance);
-			} else {
-				// non-letter character penalty??
-				totalScore += 100;
-			}
+			// absolute value
+			//double currentDistance = Math.abs((referenceHisto.getOrDefault(currChar, 0.0) - inputHisto.get(currChar)));
+			// squared difference
+			//double currentDistance = Math.pow((referenceHisto.getOrDefault(currChar, 0.0) - inputHisto.get(currChar)), 2);
+			// chi-squared
+			double expectedValue = referenceHisto.getOrDefault(currChar, 1.0);
+			double currentDistance = Math.pow((inputHisto.get(currChar) - expectedValue), 2) / expectedValue;
+			
+			totalScore += currentDistance;
 		}
 		return totalScore;
 	}
