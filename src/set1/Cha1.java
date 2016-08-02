@@ -61,4 +61,14 @@ public class Cha1 {
 		return bytesToAscii(hexStringToBytes(hexInput));
 	}
 	
+	public static byte[] asciiToBytes (String inputText) {
+		
+		int len = inputText.length();
+		byte[] outBytes = new byte[len];
+		for (int i = 0; i < len; i++) {
+			outBytes[i] = (byte)inputText.charAt(i);
+		}
+		return outBytes;
+	}
+	
 }

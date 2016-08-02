@@ -38,10 +38,15 @@ public class Cha2 {
 		
 		byte[] result = new byte[array1.length];
 		for (int i = 0; i < result.length; i++) {
-			result[i] = (byte) ((byte) array1[i] ^ (byte) array2[i]);
+			result[i] = xorHashBytes(array1[i], array2[i]);
+			//result[i] = (byte) ((byte) array1[i] ^ (byte) array2[i]);
 		}
 		
 		return result;
+	}
+	
+	public static byte xorHashBytes (byte b1, byte b2) {
+		return (byte) ((byte) b1 ^ (byte) b2);
 	}
 	
 }
