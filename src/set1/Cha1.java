@@ -71,4 +71,16 @@ public class Cha1 {
 		return outBytes;
 	}
 	
+	public static void printBytes (byte[] inputBytes, boolean asChar) {
+		if (asChar) {
+			for (byte b: inputBytes) {
+				System.out.println((char) b);
+			}
+		} else {
+			for (byte b: inputBytes) {
+				System.out.println(b);
+			}
+		}
+	}
+	
 }

@@ -45,7 +45,7 @@ public class Cha2 {
 		return result;
 	}
 	
-	public static byte xorHashBytes (byte b1, byte b2) {
+	public static byte xorHashBytes (int b1, int b2) {
 		return (byte) ((byte) b1 ^ (byte) b2);
 	}
 	
