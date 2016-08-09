@@ -21,13 +21,17 @@ public class Cha3 {
 		DecodeAttempt bestGuess = freqAnalyze(inString);
 		System.out.println("\nBest guess:");
 		System.out.println(bestGuess.plaintext);
-		System.out.println(bestGuess.englishness);
+		System.out.println((char) bestGuess.keyUsed);
+		System.out.println(bestGuess.englishScore);
 		
 	}
 
 	public static DecodeAttempt freqAnalyze(String inputString) {
-		
-		byte[] cypherBytes = Cha1.hexStringToBytes(inputString);	
+		byte[] cypherBytes = Cha1.hexStringToBytes(inputString);
+		return freqAnalyze(cypherBytes);
+	}
+	
+	public static DecodeAttempt freqAnalyze(byte[] cypherBytes) {		
 		DecodeAttempt best = null;
 		double bestScore = -1;
 		
@@ -36,7 +40,8 @@ public class Cha3 {
 			DecodeAttempt da = new DecodeAttempt(hashedBytes);
 			
 			double currScore = calculateEnglishScore(da.plaintext);
-			da.englishness = currScore;
+			da.englishScore = currScore;
+			da.keyUsed = i;
 			if ((currScore < bestScore) || (bestScore == -1)) {
 				best = da;
 				bestScore = currScore; 
@@ -57,25 +62,39 @@ public class Cha3 {
 	
 	public static double calculateEnglishScore (String inputText) {		
 		HashMap<Character, Integer> charCounts = countChars(inputText);
-		HashMap<Character, Double> charPercents = calculateFrequencies(charCounts);
-		double englishness = compareHistograms(charPercents, letterFreqs);
+		//HashMap<Character, Double> charPercents = calculateFrequencies(charCounts);
+		int totalLetters = 0;
+		for (int i : charCounts.values()) {
+			totalLetters += i;
+		}
+		HashMap<Character, Integer> letterOccurrances = getExpectedLetterOccurrences(letterFreqs, totalLetters);
+		double englishness = compareHistograms(charCounts, letterOccurrances);
 		return englishness;
+	}
+	
+	private static HashMap<Character, Integer> getExpectedLetterOccurrences(HashMap<Character, Double> letterFreqs, int totalLetters) {
+		HashMap<Character, Integer> result = new HashMap<>();
+		for (Map.Entry<Character, Double> a: letterFreqs.entrySet()) {
+			char key = a.getKey();
+			int value = (int) (a.getValue() * totalLetters);
+			result.put(key, value);
+		}
+		return result;
 	}
 	
 	public static HashMap<Character, Integer> countChars(String inputString) {
 		char[] inputArray = inputString.toLowerCase().toCharArray();
-		
 		HashMap<Character, Integer> letterCounts = new HashMap<>();
-		
 		for (int i = 0; i < inputArray.length; i++) {
 			char currentChar = inputArray[i];
-			letterCounts.put(currentChar, letterCounts.getOrDefault(currentChar, 0)+1);
+			if (Character.isLetter(currentChar)) {
+				letterCounts.put(currentChar, letterCounts.getOrDefault(currentChar, 0)+1);
+			}
 		}
 		return letterCounts;
 	}
 	
 	public static HashMap<Character, Double> calculateFrequencies (HashMap<Character, Integer> charCounts) {
-		
 		int totalLetters = 0;
 		Iterator<Character> countIter = charCounts.keySet().iterator();
 		while (countIter.hasNext()) {
@@ -96,17 +115,17 @@ public class Cha3 {
 		return letterPercentages;
 	}
 	
-	public static double compareHistograms(HashMap<Character, Double> inputHisto, HashMap<Character, Double> referenceHisto) {
-		
+	public static double compareHistograms(HashMap<Character, Integer> inputHisto, HashMap<Character, Integer> referenceHisto) {
 		double totalScore = 0;
-		Iterator<Character> letterPercentageKeysIter = inputHisto.keySet().iterator();
-		while (letterPercentageKeysIter.hasNext()) {
-			char currChar = letterPercentageKeysIter.next();
-
+		Iterator<Character> referenceHistoKeysIter = referenceHisto.keySet().iterator();
+		// Because we're iterating through expected letter values, we are only counting letters in the text;
+		// non-letter characters don't influence the score.
+		while (referenceHistoKeysIter.hasNext()) {
+			char currChar = referenceHistoKeysIter.next();
 			// find distance between known letter freqs and calculated freqs using chi-squared statistic
-			double expectedValue = referenceHisto.getOrDefault(currChar, 1.0);
-			double currentDistance = Math.pow((inputHisto.get(currChar) - expectedValue), 2) / expectedValue;
-			
+			double observedValue = inputHisto.getOrDefault(currChar, 0);
+			double expectedValue = referenceHisto.get(currChar);
+			double currentDistance = Math.pow((observedValue - expectedValue), 2) / expectedValue;
 			totalScore += currentDistance;
 		}
 		return totalScore;

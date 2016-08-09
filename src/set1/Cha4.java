@@ -16,9 +16,9 @@ public class Cha4 {
 			while ((line = br.readLine()) != null) {
 				
 				DecodeAttempt da = Cha3.freqAnalyze(line);
-				if ((da.englishness < bestScore) || (bestScore == -1)) {
+				if ((da.englishScore < bestScore) || (bestScore == -1)) {
 					best = da;
-					bestScore = da.englishness;
+					bestScore = da.englishScore;
 				}
 			}
 			br.close();
@@ -27,7 +27,7 @@ public class Cha4 {
 		}
 		
 		System.out.println(best.plaintext);
-		System.out.println(best.englishness);
+		System.out.println(best.englishScore);
 	}
 		
 }

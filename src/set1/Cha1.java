@@ -45,8 +45,11 @@ public class Cha1 {
 	}
 	
 	public static String bytesToB64 (byte[] inputBytes) {
-		String result = Base64.getEncoder().encodeToString(inputBytes);
-		return result;
+		return Base64.getEncoder().encodeToString(inputBytes);
+	}
+	
+	public static byte[] b64ToBytes (String inputString) {
+		return Base64.getDecoder().decode(inputString);
 	}
 	
 	public static String bytesToAscii (byte[] inputBytes) {
