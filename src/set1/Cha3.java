@@ -42,9 +42,11 @@ public class Cha3 {
 			double currScore = calculateEnglishScore(da.plaintext);
 			da.englishScore = currScore;
 			da.keyUsed = i;
+//			System.out.println(da.plaintext);
+//			System.out.println(da.englishScore + " / " + bestScore);
 			if ((currScore < bestScore) || (bestScore == -1)) {
 				best = da;
-				bestScore = currScore; 
+				bestScore = currScore;
 			}
 		}
 		return best;
@@ -62,21 +64,17 @@ public class Cha3 {
 	
 	public static double calculateEnglishScore (String inputText) {		
 		HashMap<Character, Integer> charCounts = countChars(inputText);
-		//HashMap<Character, Double> charPercents = calculateFrequencies(charCounts);
-		int totalLetters = 0;
-		for (int i : charCounts.values()) {
-			totalLetters += i;
-		}
-		HashMap<Character, Integer> letterOccurrances = getExpectedLetterOccurrences(letterFreqs, totalLetters);
+		int totalLetters = inputText.length();
+		HashMap<Character, Double> letterOccurrances = getExpectedLetterOccurrences(letterFreqs, totalLetters);
 		double englishness = compareHistograms(charCounts, letterOccurrances);
 		return englishness;
 	}
 	
-	private static HashMap<Character, Integer> getExpectedLetterOccurrences(HashMap<Character, Double> letterFreqs, int totalLetters) {
-		HashMap<Character, Integer> result = new HashMap<>();
+	private static HashMap<Character, Double> getExpectedLetterOccurrences(HashMap<Character, Double> letterFreqs, int totalLetters) {
+		HashMap<Character, Double> result = new HashMap<>();
 		for (Map.Entry<Character, Double> a: letterFreqs.entrySet()) {
 			char key = a.getKey();
-			int value = (int) (a.getValue() * totalLetters);
+			double value = (a.getValue() * totalLetters);
 			result.put(key, value);
 		}
 		return result;
@@ -87,44 +85,25 @@ public class Cha3 {
 		HashMap<Character, Integer> letterCounts = new HashMap<>();
 		for (int i = 0; i < inputArray.length; i++) {
 			char currentChar = inputArray[i];
-			if (Character.isLetter(currentChar)) {
-				letterCounts.put(currentChar, letterCounts.getOrDefault(currentChar, 0)+1);
-			}
+			letterCounts.put(currentChar, letterCounts.getOrDefault(currentChar, 0)+1);
 		}
 		return letterCounts;
 	}
 	
-	public static HashMap<Character, Double> calculateFrequencies (HashMap<Character, Integer> charCounts) {
-		int totalLetters = 0;
-		Iterator<Character> countIter = charCounts.keySet().iterator();
-		while (countIter.hasNext()) {
-			char currChar = Character.toLowerCase(countIter.next());
-			if ((currChar >= 'a') && (currChar <= 'z')) {
-				totalLetters += charCounts.get(currChar);
-			}
-		}
-		HashMap<Character, Double> letterPercentages = new HashMap<>();
-		
-		Iterator<Character> charCountKeysIter = charCounts.keySet().iterator();
-		while (charCountKeysIter.hasNext()) {
-			char currChar = charCountKeysIter.next();
-			double percentage = ((double)charCounts.get(currChar) / totalLetters);
-			letterPercentages.put(currChar, percentage);
-		}
-		
-		return letterPercentages;
-	}
-	
-	public static double compareHistograms(HashMap<Character, Integer> inputHisto, HashMap<Character, Integer> referenceHisto) {
+	public static double compareHistograms(HashMap<Character, Integer> inputHisto, HashMap<Character, Double> referenceHisto) {
 		double totalScore = 0;
-		Iterator<Character> referenceHistoKeysIter = referenceHisto.keySet().iterator();
-		// Because we're iterating through expected letter values, we are only counting letters in the text;
-		// non-letter characters don't influence the score.
-		while (referenceHistoKeysIter.hasNext()) {
-			char currChar = referenceHistoKeysIter.next();
-			// find distance between known letter freqs and calculated freqs using chi-squared statistic
-			double observedValue = inputHisto.getOrDefault(currChar, 0);
-			double expectedValue = referenceHisto.get(currChar);
+		
+		Iterator<Character> inputHistoKeysIter = inputHisto.keySet().iterator();
+		while (inputHistoKeysIter.hasNext()) {
+			char c = inputHistoKeysIter.next();
+			double observedValue = inputHisto.getOrDefault(c, 0);
+			double expectedValue = referenceHisto.getOrDefault(c, 0.0);
+			if (expectedValue == 0.0 && ((c > 31) && (c < 127))) {
+//				System.out.println("OK char: " + c + " : " + (int)c);
+				totalScore += 100 * observedValue;
+				continue;
+			}
+//			System.out.println(c + ": observed, expected: " + observedValue + ", " + expectedValue);
 			double currentDistance = Math.pow((observedValue - expectedValue), 2) / expectedValue;
 			totalScore += currentDistance;
 		}
