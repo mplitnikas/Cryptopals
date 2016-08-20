@@ -15,7 +15,7 @@ public class Cha4 {
 			BufferedReader br = new BufferedReader(new FileReader(filePath));
 			while ((line = br.readLine()) != null) {
 				
-				DecodeAttempt da = Cha3.freqAnalyze(line);
+				DecodeAttempt da = CaesarTools.freqAnalyze(line);
 				if ((da.englishScore < bestScore) || (bestScore == -1)) {
 					best = da;
 					bestScore = da.englishScore;
