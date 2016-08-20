@@ -4,67 +4,42 @@ import java.util.*;
 
 public class VigenereTools {
 	
-	public static String findRepeatingKey (byte[] cypherBytes) {
+	public static String findKeysize (byte[] cypherBytes) {
 		
-		int keymax;
-		if (cypherBytes.length >= 80) {
-			keymax = 40;
-		} else {
+		int keymax = 40;
+		if (cypherBytes.length < 80) {
 			keymax = cypherBytes.length / 2;
 		}
 		
-		// a sortedset that compares based on values of entries
-		SortedSet<Map.Entry<Integer, Integer>> keysizesBest = new TreeSet<Map.Entry<Integer, Integer>>(
-				new Comparator<Map.Entry<Integer, Integer>>() {
-					@Override
-					public int compare(Map.Entry<Integer, Integer> e1, Map.Entry<Integer, Integer> e2) {
-						int comp = e1.getValue().compareTo(e2.getValue());
-						if (comp == 0) {
-							return e1.getKey().compareTo(e2.getKey());
-						} else {
-							return comp;
-						}
-					}
-				});
+		ArrayList<KeysizeGuess> keysizeGuesses = new ArrayList<>(); // change to sortedlist?
 		
-		Map<Integer, Integer> keysizeMap = new TreeMap<>();
-	    for (int keysize = 2; keysize <= keymax; keysize++) {
-	    	byte[] a1 = Arrays.copyOfRange(cypherBytes, 0, keysize);
-	    	byte[] a2 = Arrays.copyOfRange(cypherBytes, keysize, keysize*2);
-	    	int score = hammingDist(a1, a2) / keysize;
-	    	keysizeMap.put(keysize, score);
-	    }
-	    
-	    keysizesBest.addAll(keysizeMap.entrySet());
-	    Iterator<Map.Entry<Integer, Integer>> keysizeCandidateIter = keysizesBest.iterator();
-	    
-	    int numCandidates = 10;
-	    for (int i = 0; i < numCandidates; i++) {
-	    	int keysize = keysizeCandidateIter.next().getKey();
-	    	byte[][] chunks = breakIntoBlocks(cypherBytes, keysize); // do this for each of the top (3?) keysizes
-			byte[][] singleKeyBlocks = transposeMatrix(chunks);
-		
-			List<DecodeAttempt> decodedBlocks = new ArrayList<>();
-			for (byte[] block : singleKeyBlocks) {
-				decodedBlocks.add(CaesarTools.freqAnalyze(block));
-			}
-	    	
-			Iterator<DecodeAttempt> blocksIter = decodedBlocks.iterator();
-			StringBuilder keyword = new StringBuilder();
-			while (blocksIter.hasNext()) {
-				DecodeAttempt next = blocksIter.next();
-				char keyChar = (char)next.keyUsed;
-				System.out.println(next.englishScore);
-				keyword.append(keyChar);
-			}
-			System.out.println(keyword);
-			System.out.println("-------------");
-	    }
-		
+		for (int i = 0; i < keymax; i++) {
+			byte[][] trialMatrix = transposeMatrix(breakIntoBlocks(cypherBytes, i));
+			KeysizeGuess ks = new KeysizeGuess(i);
+			//ks.setFriedmanScore(friedmantest);
+			//ks.setKasiskiScore(kasiskitest);
+			keysizeGuesses.add(ks);
+			
+		}
+		// return top (num) keysizes
 	    return null;
 	}
 	
-	private static byte[][] transposeMatrix (byte[][] source) {
+	public static double kasiskiExam (byte[][] inputMatrix) {
+		//TODO
+		// compare each block with those below via hamming distance
+		// return sum of all distances
+		// lower is better
+		return 0.0;
+	}
+	
+	public static double friedmanTest (byte[][] inputMatrix) {
+		//TODO
+		return 0.0;		
+	}
+	
+	
+	public static byte[][] transposeMatrix (byte[][] source) {
 		int cols = source.length;
 		int rows = source[0].length;
 		byte[][] output = new byte[rows][cols];

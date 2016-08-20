@@ -21,7 +21,7 @@ public class Cha6 {
 		}
 		
 		byte[] inBytes = Cha1.b64ToBytes(inputText);
-		System.out.println(VigenereTools.findRepeatingKey(inBytes));
+		System.out.println(VigenereTools.findKeysize(inBytes));
 		
 	}
 }

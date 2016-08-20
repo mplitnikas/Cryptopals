@@ -18,6 +18,7 @@ public class DecodeAttempt implements Comparable<DecodeAttempt> {
 		this.plaintext = inString;
 	}
 	
+	@Override
 	public int compareTo (DecodeAttempt otherObj) {
 		double a = this.englishScore;
 		double b = otherObj.englishScore;
