@@ -31,9 +31,9 @@ public class CaesarTools {
 			double currScore = calculateEnglishScore(da.plaintext);
 			da.englishScore = currScore;
 			da.keyUsed = i;
-//			System.out.println(da.plaintext);
-//			System.out.println(da.englishScore + " / " + bestScore);
-			if ((currScore < bestScore) || (bestScore == -1)) {
+			System.out.println(da.plaintext);
+			System.out.println(da.englishScore + " / " + bestScore);
+			if (currScore > bestScore) {
 				best = da;
 				bestScore = currScore;
 			}
@@ -54,10 +54,22 @@ public class CaesarTools {
 	public static double calculateEnglishScore (String inputText) {		
 		HashMap<Character, Integer> charCounts = countChars(inputText);
 		int totalLetters = inputText.length();
-		HashMap<Character, Double> letterOccurrances = getExpectedLetterOccurrences(letterFreqs, totalLetters);
-		double englishness = compareHistograms(charCounts, letterOccurrances);
+		HashMap<Character, Double> letterProportions = calculateFrequencies(charCounts, totalLetters);
+		double englishness = compareHistograms(letterProportions, letterFreqs);
 		return englishness;
 	}
+	
+	public static HashMap<Character, Double> calculateFrequencies (HashMap<Character, Integer> charCounts, int totalLetters) {		
+		 		HashMap<Character, Double> letterPercentages = new HashMap<>();
+		 		Iterator<Character> charCountKeysIter = charCounts.keySet().iterator();
+		 		while (charCountKeysIter.hasNext()) {
+		 			char currChar = charCountKeysIter.next();
+		 			double percentage = ((double)charCounts.get(currChar) / totalLetters);
+		 			letterPercentages.put(currChar, percentage);
+		 		}
+		 		
+		 		return letterPercentages;
+		 	}
 	
 	private static HashMap<Character, Double> getExpectedLetterOccurrences(HashMap<Character, Double> letterFreqs, int totalLetters) {
 		HashMap<Character, Double> result = new HashMap<>();
@@ -79,7 +91,7 @@ public class CaesarTools {
 		return letterCounts;
 	}
 	
-	public static double compareHistograms(HashMap<Character, Integer> inputHisto, HashMap<Character, Double> referenceHisto) {
+	public static double compareHistograms(HashMap<Character, Double> inputHisto, HashMap<Character, Double> referenceHisto) {
 		/** 
 		 * Returns similarity score of the two histograms containing <Character, Double> proportion information.
 		 * Values must be between 0.0 - 1.0 to work properly.
@@ -91,15 +103,10 @@ public class CaesarTools {
 		Iterator<Character> inputHistoKeysIter = inputHisto.keySet().iterator();
 		while (inputHistoKeysIter.hasNext()) {
 			char c = inputHistoKeysIter.next();
-			double observedValue = inputHisto.getOrDefault(c, 0);
+			double observedValue = inputHisto.get(c);
 			double expectedValue = referenceHisto.getOrDefault(c, 0.0);
-			if (expectedValue == 0.0 && ((c > 31) && (c < 127))) {
-//				System.out.println("OK char: " + c + " : " + (int)c);
-				totalScore += 10 * observedValue;
-				continue;
-			}
 //			System.out.println(c + ": observed, expected: " + observedValue + ", " + expectedValue);
-			double currentDistance = Math.pow((observedValue - expectedValue), 2) / expectedValue;
+			double currentDistance = observedValue * expectedValue; // Super easy! Higher total score = better.
 			totalScore += currentDistance;
 		}
 		return totalScore;
