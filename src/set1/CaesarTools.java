@@ -31,8 +31,8 @@ public class CaesarTools {
 			double currScore = calculateEnglishScore(da.plaintext);
 			da.englishScore = currScore;
 			da.keyUsed = i;
-			System.out.println(da.plaintext);
-			System.out.println(da.englishScore + " / " + bestScore);
+//			System.out.println(da.plaintext);
+//			System.out.println(da.englishScore + " / " + bestScore);
 			if (currScore > bestScore) {
 				best = da;
 				bestScore = currScore;
