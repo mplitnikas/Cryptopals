@@ -87,7 +87,6 @@ public class VigenereTools {
 		return output;
 	}
 	
-	
 	public static int hammingDist (byte[] a1, byte[] a2) {
 		assert (a1.length == a2.length);
 		int totalDist = 0;
